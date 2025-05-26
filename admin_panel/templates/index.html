@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Панель администратора</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+        async function markHandled(type, key, btn) {
+            const formData = new FormData();
+            formData.append("type", type);
+            formData.append("key", key);
+
+            const res = await fetch("/mark_handled", {
+                method: "POST",
+                body: formData
+            });
+
+            if (res.ok) {
+                btn.disabled = true;
+                btn.innerText = "✅ Обработано";
+                btn.classList.add("done");
+            }
+        }
+
+        async function sendBroadcastNow(btn) {
+            btn.disabled = true;
+            btn.innerText = "⏳ Отправляется...";
+            const res = await fetch("/send_broadcast_now", { method: "POST" });
+            if (res.ok) {
+                btn.innerText = "✅ Отправлено";
+            } else {
+                btn.innerText = "⚠️ Ошибка";
+                btn.disabled = false;
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        h1, h2 {
+            margin-top: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 6px 10px;
+            text-align: left;
+        }
+
+        input[type="text"],
+        input[type="url"],
+        input[type="date"],
+        textarea {
+            width: 100%;
+            max-width: 100%;
+            padding: 6px;
+            margin: 6px 0;
+            box-sizing: border-box;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 8px 14px;
+            margin-top: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        button.done {
+            background-color: #8bc34a;
+            color: white;
+        }
+
+        .send-buttons {
+            display: flex;
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Панель администратора</h1>
+
+    <h2>✈️ Заявки на туры</h2>
+    <form method="get" action="/">
+        <label>С даты: <input type="date" name="from_date" value="{{ from_date }}"></label>
+        <label>по дату: <input type="date" name="to_date" value="{{ to_date }}"></label>
+        <label><input type="checkbox" name="only_new" {% if only_new %}checked{% endif %}> Только необработанные</label>
+        <button type="submit">🔍 Фильтровать</button>
+    </form>
+
+    <table>
+        <tr>
+            <th>Дата</th><th>Имя</th><th>Telegram ID</th><th>Страна</th><th>С</th><th>По</th><th>Чел.</th><th>Бюджет</th><th>Комментарий</th><th></th>
+        </tr>
+        {% for row, handled in tours %}
+        <tr>
+            {% for cell in row %}
+            <td>{{ cell }}</td>
+            {% endfor %}
+            <td>
+                {% if handled %}
+                <button class="done" disabled>✅ Обработано</button>
+                {% else %}
+                <button onclick="markHandled('tours', '{{ row[0] + row[2] }}', this)">🟢 Обработать</button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>🏨 Заявки на отели</h2>
+    <table>
+        <tr>
+            <th>Дата</th><th>Имя</th><th>Telegram ID</th><th>Город</th><th>С</th><th>По</th><th>Категория</th><th>Комментарий</th><th></th>
+        </tr>
+        {% for row, handled in hotels %}
+        <tr>
+            {% for cell in row %}
+            <td>{{ cell }}</td>
+            {% endfor %}
+            <td>
+                {% if handled %}
+                <button class="done" disabled>✅ Обработано</button>
+                {% else %}
+                <button onclick="markHandled('hotels', '{{ row[0] + row[2] }}', this)">🟢 Обработать</button>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>🔥 Рассылка горящего тура</h2>
+    <form method="post" action="/broadcast">
+        <input type="text" name="title" placeholder="Заголовок" required><br>
+        <textarea name="message" rows="4" placeholder="Описание тура..." required></textarea><br>
+        <input type="url" name="image_url" placeholder="Ссылка на изображение (необязательно)"><br>
+        <div class="send-buttons">
+            <button type="submit">💾 Сохранить рассылку</button>
+            <button type="button" onclick="sendBroadcastNow(this)">📤 Отправить рассылку</button>
+        </div>
+    </form>
+</body>
+</html>
