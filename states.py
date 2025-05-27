@@ -3,6 +3,7 @@ from aiogram.fsm.state import StatesGroup, State
 class TourRequest(StatesGroup):
     country = State()
     nights = State()
+    nights_manual = State()
     approx_date = State()
     people = State()
     budget = State()

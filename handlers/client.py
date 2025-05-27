@@ -55,6 +55,24 @@ async def pick_nights(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text("⏳ Сколько ночей планируете?", reply_markup=choose_date_from_kb())
     await state.set_state(TourRequest.nights)
 
+@router.callback_query(F.data == "nights_manual")
+async def ask_manual_nights(callback: CallbackQuery, state: FSMContext):
+    await callback.message.edit_text("✍️ Введите количество ночей вручную:")
+    await state.set_state(TourRequest.nights_manual)
+
+@router.message(TourRequest.nights_manual)
+async def handle_manual_nights(message: Message, state: FSMContext):
+    nights = message.text.strip()
+
+    if not nights.isdigit() or int(nights) <= 0:
+        await message.answer("❌ Пожалуйста, введите корректное число ночей.")
+        return
+
+    await state.update_data(nights=nights)
+    await message.answer("📅 Выберите приблизительную дату вылета:",
+                         reply_markup=await SimpleCalendar().start_calendar())
+    await state.set_state(TourRequest.approx_date)
+
 @router.callback_query(F.data.startswith("nights_"), TourRequest.nights)
 async def ask_date(callback: CallbackQuery, state: FSMContext):
     nights = callback.data.split("_", 1)[1]
