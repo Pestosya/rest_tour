@@ -8,8 +8,8 @@ services:
       - "8000:8000"
     volumes:
       - ./data:/app/data
-      - ./static:/app/static
-      - ./templates:/app/templates
+      - ./admin_panel/static:/app/admin_panel/static
+      - ./admin_panel/templates:/app/admin_panel/templates
     environment:
       - TZ=Europe/Moscow
     restart: unless-stopped
