@@ -2,8 +2,8 @@ from aiogram import Bot
 from config import BOT_TOKEN
 from pathlib import Path
 
-BROADCAST_FILE = Path("admin_panel/data/broadcast.txt")
-USERS_FILE = Path("admin_panel/data/users.csv")
+BROADCAST_FILE = Path("data/broadcast.txt")
+USERS_FILE = Path("data/users.csv")
 
 async def send_broadcast():
     if not BROADCAST_FILE.exists():

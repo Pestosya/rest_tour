@@ -13,18 +13,21 @@ def write_tour(data: dict, user):
     with open(TOUR_FILE, mode="a", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
         if is_new:
-            writer.writerow(["Дата", "Имя", "Telegram ID", "Страна", "С", "По", "Человек", "Бюджет", "Комментарий"])
+            writer.writerow(
+                ["Дата", "Имя", "Telegram ID", "Страна", "С", "По", "Человек", "Бюджет", "Комментарий", "Телефон"])
         writer.writerow([
             datetime.now().strftime("%Y-%m-%d %H:%M"),
             user.full_name,
             user.id,
             data["country"],
-            data["date_from"],
-            data["date_to"],
+            data["approx_date"],
+            data["nights"],
             data["people"],
             data["budget"],
-            data["comment"]
+            data["comment"],
+            data["phone"]
         ])
+
 
 def write_hotel(data: dict, user):
     is_new = not HOTEL_FILE.exists()
